@@ -1,0 +1,43 @@
+{
+  "deal": {
+    "id": "string (uuid)",
+    "property_id": "string (uuid)",
+    "buyer_id": "string (uuid)",
+    "seller_id": "string (uuid)",
+    "status": "string (enum: 'active' | 'completed' | 'cancelled' | 'expired')",
+    "current_offer_id": "string (uuid)",
+    "created_at": "string (timestamp)",
+    "updated_at": "string (timestamp)",
+    "completed_at": "string (timestamp) | null",
+    "expiry_date": "string (timestamp) | null",
+    "deal_type": "string | null",
+    "final_price": "number | null",
+    "final_currency": "string | null",
+    "metadata": "object | null"
+  },
+  "offer": {
+    "id": "string (uuid)",
+    "deal_id": "string (uuid)",
+    "property_id": "string (uuid)",
+    "user_id": "string (uuid)",
+    "parent_offer_id": "string (uuid) | null",
+    "version": "number",
+    "status": "string (enum: 'pending_review' | 'accepted' | 'rejected' | 'countered' | 'withdrawn')",
+    "total_amount": "number",
+    "currency": "string",
+    "payment_structure": "string (enum: 'full' | 'installments')",
+    "offer_validity_date": "string (date) | null",
+    "other_conditions": "string | null",
+    "created_at": "string (timestamp)",
+    "metadata": {
+      "installments": [
+        {
+          "date": "string (date)",
+          "amount": "number",
+          "currency": "string",
+          "payment_method": "string"
+        }
+      ]
+    }
+  }
+} 
