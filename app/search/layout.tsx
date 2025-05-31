@@ -1,25 +1,16 @@
 'use client'; // Add use client for useRouter and event handling
 
-import { AppSidebar } from "@/components/app-sidebar"
-import { useRouter } from 'next/navigation'; // Import useRouter
-import { supabase } from '@/lib/supabase'; // Import supabase client
+import { SimpleSidebar } from "@/components/SimpleSidebar";
 
 export default function SearchLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/'); // Redirect to homepage after logout
-  };
-
   return (
-    <div className="flex min-h-screen">
-      <AppSidebar handleLogout={handleLogout} />
-      <main className="flex-1">
+    <div className="min-h-screen">
+      <SimpleSidebar />
+      <main className="flex-1 md:ml-64">
         {children}
       </main>
     </div>

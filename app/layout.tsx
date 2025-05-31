@@ -1,14 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { SidebarWithLogout } from "@/components/SidebarWithLogout";
+import { Providers } from "@/components/providers";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Sunday App",
-  description: "Real Estate Platform",
+  title: "Sunday Properties",
+  description: "Real Estate Management Platform",
 };
 
 export default function RootLayout({
@@ -19,14 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <SidebarProvider>
-          <div className="flex h-screen">
-            <SidebarWithLogout />
-            <main className="flex-1 overflow-y-auto md:ml-[16rem]">
-              {children}
-            </main>
-          </div>
-        </SidebarProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

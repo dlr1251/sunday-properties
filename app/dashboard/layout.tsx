@@ -3,10 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { SidebarWithLogout } from "@/components/SidebarWithLogout";
-import { Toaster } from '@/components/ui/sonner';
-// Assuming you have a LoginForm component, otherwise we can create a simple one
-// import LoginForm from '@/components/LoginForm'; 
+import { SimpleSidebar } from "@/components/SimpleSidebar";
 
 export default function DashboardLayout({
   children,
@@ -19,35 +16,44 @@ export default function DashboardLayout({
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser(session.user);
-      } else {
-        // If no user, redirect to login, or you can show a login form directly
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          router.push('/login');
+        }
+      } catch (error) {
+        console.error('Error checking user session:', error);
         router.push('/login');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     checkUser();
   }, [router]);
 
   if (loading) {
-    return <div>Loading...</div>; // Or a proper loading spinner
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
-    // This part might not be reached if redirect happens quickly
-    // return <LoginForm />; // Or redirect again, or show a message
-    return <div>Redirecting to login...</div>;
+    return null; // Router will handle redirect
   }
 
   return (
-    <div className="flex h-screen">
-      <SidebarWithLogout />
-      <main className="flex-1 overflow-y-auto md:mx-auto">
+    <div className="min-h-screen">
+      <SimpleSidebar />
+      <main className="flex-1 md:ml-64">
         {children}
       </main>
-      <Toaster />
     </div>
   );
 }

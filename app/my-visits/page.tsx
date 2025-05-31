@@ -313,19 +313,9 @@ export default function MyVisitsPage() {
             <Card key={visit.id} className="flex flex-col overflow-hidden transition-shadow hover:shadow-lg">
               <CardHeader className="p-0 relative">
                 <Link href={`/property/${encodeURIComponent(visit.property_id)}`} className="block aspect-[16/9] bg-muted overflow-hidden">
-                  {/* property.images will not exist on PropertyForVisit, using fallback */}
-                  {false && property?.images && property.images.length > 0 ? (
-                    // @ts-expect-error Property 'images' does not exist on 'PropertyForVisit | null'.
-                    <img 
-                      src={property.images[0]} 
-                      alt={property.title || 'Property image'} 
-                      className="h-full w-full object-cover transition-transform hover:scale-105"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gray-200">
-                      <Home className="h-12 w-12 text-gray-400" />
-                    </div>
-                  )}
+                  <div className="flex h-full w-full items-center justify-center bg-gray-200">
+                    <Home className="h-12 w-12 text-gray-400" />
+                  </div>
                 </Link>
               </CardHeader>
               <CardContent className="p-4 flex-grow">
@@ -334,11 +324,6 @@ export default function MyVisitsPage() {
                     {property?.title || 'Property Title Unavailable'}
                   </CardTitle>
                 </Link>
-                {/* @ts-expect-error Property 'address' does not exist on 'PropertyForVisit | null'. */}
-                <CardDescription className="text-sm text-muted-foreground mt-1 truncate" title={property?.address}>
-                  {property?.address || 'Address not available'} 
-                </CardDescription>
-                
                 <div className="mt-3 space-y-1 text-sm">
                   <p>
                     <strong>Date:</strong> {format(visitDateObject, 'PPPp')}

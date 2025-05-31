@@ -1,4 +1,6 @@
-import { AppSidebar } from '@/components/app-sidebar';
+'use client';
+
+import { SimpleSidebar } from '@/components/SimpleSidebar';
 
 export default function PropertyLayout({
   children,
@@ -6,9 +8,9 @@ export default function PropertyLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-screen">
-      <AppSidebar />
-      <main className="flex-1 overflow-y-auto">
+    <div className="min-h-screen">
+      <SimpleSidebar />
+      <main className="flex-1 md:ml-64">
         {children}
       </main>
     </div>

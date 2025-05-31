@@ -7,21 +7,18 @@ import { type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { toggleVariants } from "@/components/ui/toggle"
 
-const ToggleGroupContext = React.createContext<
-  VariantProps<typeof toggleVariants>
->({
-  size: "default",
-  variant: "default",
-})
+type ToggleGroupProps = React.ComponentProps<typeof ToggleGroupPrimitive.Root> & {
+  variant?: VariantProps<typeof toggleVariants>["variant"]
+  size?: VariantProps<typeof toggleVariants>["size"]
+}
 
-function ToggleGroup({
+export function ToggleGroup({
   className,
   variant,
   size,
   children,
   ...props
-}: React.ComponentProps<typeof ToggleGroupPrimitive.Root> &
-  VariantProps<typeof toggleVariants>) {
+}: ToggleGroupProps) {
   return (
     <ToggleGroupPrimitive.Root
       data-slot="toggle-group"
@@ -33,32 +30,40 @@ function ToggleGroup({
       )}
       {...props}
     >
-      <ToggleGroupContext.Provider value={{ variant, size }}>
-        {children}
-      </ToggleGroupContext.Provider>
+      {React.Children.map(children, (child) => {
+        if (React.isValidElement<ToggleGroupItemProps>(child)) {
+          return React.cloneElement(child, {
+            variant,
+            size,
+          })
+        }
+        return child
+      })}
     </ToggleGroupPrimitive.Root>
   )
 }
 
-function ToggleGroupItem({
+type ToggleGroupItemProps = React.ComponentProps<typeof ToggleGroupPrimitive.Item> & {
+  variant?: VariantProps<typeof toggleVariants>["variant"]
+  size?: VariantProps<typeof toggleVariants>["size"]
+}
+
+export function ToggleGroupItem({
   className,
   children,
-  variant,
-  size,
+  variant = "default",
+  size = "default",
   ...props
-}: React.ComponentProps<typeof ToggleGroupPrimitive.Item> &
-  VariantProps<typeof toggleVariants>) {
-  const context = React.useContext(ToggleGroupContext)
-
+}: ToggleGroupItemProps) {
   return (
     <ToggleGroupPrimitive.Item
       data-slot="toggle-group-item"
-      data-variant={context.variant || variant}
-      data-size={context.size || size}
+      data-variant={variant}
+      data-size={size}
       className={cn(
         toggleVariants({
-          variant: context.variant || variant,
-          size: context.size || size,
+          variant,
+          size,
         }),
         "min-w-0 flex-1 shrink-0 rounded-none shadow-none first:rounded-l-md last:rounded-r-md focus:z-10 focus-visible:z-10 data-[variant=outline]:border-l-0 data-[variant=outline]:first:border-l",
         className
@@ -69,5 +74,3 @@ function ToggleGroupItem({
     </ToggleGroupPrimitive.Item>
   )
 }
-
-export { ToggleGroup, ToggleGroupItem }

@@ -1,11 +1,6 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-
-@custom-variant dark (&:is(.dark *));
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
 
 @layer base {
   :root {
@@ -54,10 +49,10 @@
   }
 
   * {
-    @apply border-border;
+    /* Removed @apply border; */
   }
   body {
-    @apply bg-background text-foreground;
+    /* Removed @apply bg-background text-foreground; */
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
@@ -126,9 +121,9 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    /* Removed @apply border outline-ring/50; */
   }
   body {
-    @apply bg-background text-foreground;
+    /* Removed @apply bg-background text-foreground; */
   }
 }

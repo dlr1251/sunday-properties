@@ -250,16 +250,25 @@ export default function PropertyPage() {
     );
   }
 
-  if (error || !property) {
+  if (error) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-        <AlertTriangle className="h-12 w-12 text-red-500 mb-4" />
-        <h2 className="text-2xl font-semibold mb-2">Error Loading Property</h2>
-        <p className="text-red-500 mb-6">{error || 'Property not found'}</p>
-        <Link href="/search">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
-          </Button>
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <AlertTriangle className="h-8 w-8 text-red-500 mb-4" />
+        <p className="text-red-500">{error}</p>
+        <Link href="/" className="mt-4 text-primary hover:underline">
+          Return to Home
+        </Link>
+      </div>
+    );
+  }
+
+  if (!property) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <AlertTriangle className="h-8 w-8 text-yellow-500 mb-4" />
+        <p className="text-yellow-500">Property not found</p>
+        <Link href="/" className="mt-4 text-primary hover:underline">
+          Return to Home
         </Link>
       </div>
     );
@@ -268,126 +277,127 @@ export default function PropertyPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
-        <Link href="/search">
-          <Button variant="outline">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Search
-          </Button>
+        <Link href="/" className="inline-flex items-center text-primary hover:underline">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
         </Link>
       </div>
 
-      <Card className="mb-8 shadow-lg">
-        <CardHeader className="flex flex-col md:flex-row md:items-start gap-4">
-          <div className="w-full md:w-1/3">
-            <PropertyGallery images={property.images || []} title={property.title} />
-          </div>
-          <div className="flex-1">
-            <CardTitle className="text-3xl font-bold text-primary mb-1">{property.title}</CardTitle>
-            <CardDescription className="text-slate-600 mb-3">
-              {property.address || 'Address not specified'} - {property.city}, {property.country}
-            </CardDescription>
-            <div className="flex items-center mb-3">
-              <Avatar className="h-10 w-10 mr-3 border">
-                <AvatarFallback>{property.user_profiles?.full_name?.charAt(0) || 'O'}</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="font-semibold text-sm">Property Owner</p>
-                <p className="text-xs text-slate-500">
-                  {property.user_profiles?.full_name || 'N/A'}
-                </p>
-              </div>
-            </div>
-            <Badge variant="secondary" className="capitalize">{property.type || 'Property'}</Badge>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <p className="text-lg font-semibold text-green-600 mb-2">
-            Price: {property.price.toLocaleString('es-CO', { style: 'currency', currency: property.currency || 'COP' })}
-          </p>
-          <p className="text-sm text-slate-700 mb-4 leading-relaxed whitespace-pre-line">
-            {property.description}
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
-            <span><strong>Type:</strong> {property.type || 'N/A'}</span>
-            <span><strong>Area:</strong> {property.area_m2 ? `${property.area_m2} m²` : 'N/A'}</span>
-            <span><strong>Bedrooms:</strong> {property.bedrooms ?? 'N/A'}</span>
-            <span><strong>Bathrooms:</strong> {property.bathrooms ?? 'N/A'}</span>
-            <span><strong>Parking:</strong> {property.parking_slots ?? 'N/A'}</span>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <PropertyGallery images={property.images || []} title={property.title} />
           <PropertyDetails
             bedrooms={property.bedrooms || 0}
             bathrooms={property.bathrooms || 0}
             parking_spots={property.parking_slots || 0}
-            area={property.area_m2 || 0}
+            created_at={property.created_at || new Date().toISOString()}
             description={property.description || ''}
-            created_at={property.created_at || ''}
+            area={property.area_m2 || 0}
           />
-          {property.user_id === userId && (
-            <OwnerPanel 
+        </div>
+
+        <div className="lg:col-span-1">
+          {userId === property.user_id ? (
+            <OwnerPanel
               property={property}
-              onSaveDescription={(desc) => {
-                // Implement save description
+              onSaveDescription={async (desc) => {
+                try {
+                  const { error } = await supabase
+                    .from('properties')
+                    .update({ description: desc })
+                    .eq('id', property.id);
+                  if (error) throw error;
+                  toast.success('Description updated successfully');
+                } catch (err: any) {
+                  toast.error(err.message || 'Failed to update description');
+                }
               }}
-              onSaveMinConditions={(min) => {
-                // Implement save min conditions
+              onSaveMinConditions={async (min) => {
+                try {
+                  const { error } = await supabase
+                    .from('properties')
+                    .update({
+                      min_price: min.price,
+                      min_timing: min.timing,
+                      min_conditions: min.conditions
+                    })
+                    .eq('id', property.id);
+                  if (error) throw error;
+                  toast.success('Minimum conditions updated successfully');
+                } catch (err: any) {
+                  toast.error(err.message || 'Failed to update minimum conditions');
+                }
               }}
-              onCreateOwnerOffer={(offer) => {
-                // Implement create owner offer
+              onCreateOwnerOffer={async (offer) => {
+                try {
+                  const { error } = await supabase
+                    .from('offers')
+                    .insert([{
+                      property_id: property.id,
+                      user_id: userId,
+                      amount: offer.price,
+                      timing: offer.timing,
+                      conditions: offer.conditions,
+                      status: 'pending'
+                    }]);
+                  if (error) throw error;
+                  toast.success('Offer created successfully');
+                } catch (err: any) {
+                  toast.error(err.message || 'Failed to create offer');
+                }
               }}
+            />
+          ) : (
+            <VisitorPanel
+              propertyId={property.id}
+              isFavorited={isFavorited}
+              onToggleFavorite={toggleFavorite}
+              loadingFavoriteStatus={loadingFavoriteStatus}
+              hasCompletedVisit={hasCompletedVisit}
+              loadingCompletedVisitStatus={loading}
+              activeScheduledVisit={activeScheduledVisit}
+              onBookVisit={() => setIsBookingDialogOpen(true)}
+              propertyVisits={propertyVisits}
             />
           )}
         </div>
-
-        <div className="space-y-6">
-          <VisitorPanel
-            propertyId={property.id}
-            isFavorited={isFavorited}
-            onToggleFavorite={toggleFavorite}
-            loadingFavoriteStatus={loadingFavoriteStatus}
-            hasCompletedVisit={hasCompletedVisit}
-            loadingCompletedVisitStatus={loading}
-            activeScheduledVisit={activeScheduledVisit}
-            onBookVisit={() => setIsBookingDialogOpen(true)}
-            propertyVisits={propertyVisits}
-          />
-        </div>
       </div>
 
-      {/* Booking Dialog */}
       <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Schedule a Visit</DialogTitle>
             <DialogDescription>
-              Select a date and time for your visit to "{property?.title}".
+              Choose a date and time for your property visit.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="flex flex-col gap-2">
-              <label htmlFor="visit-date" className="text-sm font-medium">Visit Date & Time</label>
-              <DatePicker
-                id="visit-date"
-                selected={selectedVisitDate}
-                onChange={(date: Date | null) => setSelectedVisitDate(date)}
-                showTimeSelect
-                dateFormat="Pp"
-                minDate={new Date()} // Prevent selecting past dates
-                className="w-full p-2 border rounded-md"
-                placeholderText="Select date and time"
-              />
-            </div>
+
+          <div className="py-4">
+            <DatePicker
+              selected={selectedVisitDate}
+              onChange={(date: Date | null) => setSelectedVisitDate(date)}
+              minDate={new Date()}
+              inline
+              className="w-full"
+            />
           </div>
+
           <DialogFooter>
             <DialogClose asChild>
-              <Button type="button" variant="outline">Cancel</Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="submit" onClick={handleBookVisit} disabled={bookingLoading || !selectedVisitDate}>
-              {bookingLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Schedule Visit
+            <Button
+              onClick={handleBookVisit}
+              disabled={!selectedVisitDate || bookingLoading}
+            >
+              {bookingLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Scheduling...
+                </>
+              ) : (
+                'Schedule Visit'
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

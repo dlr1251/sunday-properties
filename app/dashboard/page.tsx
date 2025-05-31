@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Building2, DollarSign, Users, Home, TrendingUp, Heart, Briefcase, Calendar, Clock, Target, BarChart3, Percent } from 'lucide-react';
+import { DollarSign, Home, Heart, Briefcase, Calendar, Clock, Target, Percent } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 export default function DashboardPage() {
@@ -107,7 +107,7 @@ export default function DashboardPage() {
               {loadingFavorites ? '...' : favoritesCount}
             </div>
             <p className="text-xs text-muted-foreground">
-              Properties you've favorited
+              Properties you&apos;ve favorited
             </p>
           </CardContent>
         </Card>

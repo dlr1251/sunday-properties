@@ -1,92 +1,43 @@
 "use client"
 
-import {
-  IconDots,
-  IconFolder,
-  IconShare3,
-  IconTrash,
-  type Icon,
-} from "@tabler/icons-react"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { IconFileText, IconFolder } from '@tabler/icons-react';
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  SidebarGroup,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuAction,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
-
-export function NavDocuments({
-  items,
-}: {
+interface NavDocumentsProps {
   items: {
-    name: string
-    url: string
-    icon: Icon
-  }[]
-}) {
-  const { isMobile } = useSidebar()
+    title: string;
+    href: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  }[];
+}
+
+export function NavDocuments({ items }: NavDocumentsProps) {
+  const pathname = usePathname();
 
   return (
-    <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-      <SidebarGroupLabel>Documents</SidebarGroupLabel>
-      <SidebarMenu>
-        {items.map((item) => (
-          <SidebarMenuItem key={item.name}>
-            <SidebarMenuButton asChild>
-              <a href={item.url}>
-                <item.icon />
-                <span>{item.name}</span>
-              </a>
-            </SidebarMenuButton>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuAction
-                  showOnHover
-                  className="data-[state=open]:bg-accent rounded-sm"
-                >
-                  <IconDots />
-                  <span className="sr-only">More</span>
-                </SidebarMenuAction>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-24 rounded-lg"
-                side={isMobile ? "bottom" : "right"}
-                align={isMobile ? "end" : "start"}
-              >
-                <DropdownMenuItem>
-                  <IconFolder />
-                  <span>Open</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <IconShare3 />
-                  <span>Share</span>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <IconTrash />
-                  <span>Delete</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        ))}
-        <SidebarMenuItem>
-          <SidebarMenuButton className="text-sidebar-foreground/70">
-            <IconDots className="text-sidebar-foreground/70" />
-            <span>More</span>
-          </SidebarMenuButton>
-        </SidebarMenuItem>
-      </SidebarMenu>
-    </SidebarGroup>
-  )
+    <div className="space-y-2">
+      <div className="flex items-center space-x-2 px-4 py-2">
+        <IconFolder className="w-5 h-5" />
+        <span className="text-sm font-medium">Documents</span>
+      </div>
+      <nav className="space-y-1">
+        {items.map((item) => {
+          const Icon = item.icon || IconFileText;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-md ${
+                pathname === item.href ? 'bg-accent' : 'hover:bg-accent/50'
+              }`}
+            >
+              <Icon className="w-5 h-5" />
+              <span>{item.title}</span>
+            </Link>
+          );
+        })}
+      </nav>
+    </div>
+  );
 }
