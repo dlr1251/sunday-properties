@@ -12,8 +12,10 @@ import { ArrowLeft, Home, AlertTriangle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { PropertyGallery } from '@/components/property/PropertyGallery';
 import { PropertyDetails } from '@/components/property/PropertyDetails';
+import { NeighborhoodSection } from '@/components/property/NeighborhoodSection';
 import { OwnerPanel } from '@/components/property/OwnerPanel';
 import { VisitorPanel } from '@/components/property/VisitorPanel';
+import { isPropertyUuid } from '@/lib/nearbyPlaces';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -36,20 +38,30 @@ type ActiveVisitInfo = {
 
 interface Property {
   id: string;
-  user_id: string;
+  user_id?: string;
+  owner_id?: string;
   title: string;
   description?: string | null;
   images?: string[] | null;
-  price: number;
+  price?: number | null;
+  rent_monthly?: number | null;
+  listing_type?: string | null;
   currency?: string | null;
   type?: string | null;
+  property_type?: string | null;
   address?: string | null;
+  neighborhood?: string | null;
   city?: string | null;
   country?: string | null;
+  slug?: string | null;
+  area?: number | null;
   area_m2?: number | null;
   bedrooms?: number | null;
   bathrooms?: number | null;
+  parking?: number | null;
   parking_slots?: number | null;
+  coordinates?: { lat: number; lng: number } | null;
+  nearby_places?: unknown;
   created_at?: string | null;
   user_profiles?: {
     id: string;
@@ -87,12 +99,11 @@ export default function PropertyPage() {
         const { data: { user } } = await supabase.auth.getUser();
         setUserId(user?.id || null);
 
-        // Get property data
-        const { data: propertyData, error: propertyError } = await supabase
-          .from('properties')
-          .select('*')
-          .eq('id', propertyId)
-          .single();
+        // Get property data by UUID or public slug
+        const propertyQuery = supabase.from('properties').select('*');
+        const { data: propertyData, error: propertyError } = await (isPropertyUuid(propertyId)
+          ? propertyQuery.eq('id', propertyId).single()
+          : propertyQuery.eq('slug', propertyId).single());
 
         console.log('Property query result:', { data: propertyData, error: propertyError });
 
@@ -100,11 +111,12 @@ export default function PropertyPage() {
         if (!propertyData) throw new Error('Property not found');
 
         // Get user profile data
-        console.log('Fetching profile data for user_id:', propertyData.user_id);
+        const ownerId = propertyData.owner_id || propertyData.user_id;
+        console.log('Fetching profile data for owner:', ownerId);
         const { data: userProfile, error: userError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', propertyData.user_id)
+          .eq('id', ownerId)
           .maybeSingle();
 
         console.log('Profile data:', userProfile);
@@ -285,19 +297,29 @@ export default function PropertyPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <PropertyGallery images={property.images || []} title={property.title} />
-          <PropertyDetails
-            bedrooms={property.bedrooms || 0}
-            bathrooms={property.bathrooms || 0}
-            parking_spots={property.parking_slots || 0}
-            created_at={property.created_at || new Date().toISOString()}
-            description={property.description || ''}
-            area={property.area_m2 || 0}
-          />
+          <div className="space-y-6">
+            <PropertyGallery images={property.images || []} title={property.title} />
+            <PropertyDetails
+              bedrooms={property.bedrooms || 0}
+              bathrooms={property.bathrooms || 0}
+              parking_spots={property.parking_slots || property.parking || 0}
+              created_at={property.created_at || new Date().toISOString()}
+              description={property.description || ''}
+              area={property.area_m2 || property.area || 0}
+            />
+            <NeighborhoodSection
+              title={property.title}
+              address={property.address}
+              neighborhood={property.neighborhood}
+              city={property.city}
+              coordinates={property.coordinates}
+              nearbyPlaces={property.nearby_places}
+            />
+          </div>
         </div>
 
         <div className="lg:col-span-1">
-          {userId === property.user_id ? (
+          {userId === (property.user_id || property.owner_id) ? (
             <OwnerPanel
               property={property}
               onSaveDescription={async (desc) => {

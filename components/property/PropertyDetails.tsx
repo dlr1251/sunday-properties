@@ -32,7 +32,7 @@ export function PropertyDetails({ bedrooms, bathrooms, parking_spots, created_at
       <Separator />
       <div className="space-y-2">
         <h3 className="font-semibold">Description</h3>
-        <p className="text-muted-foreground">{description}</p>
+        <p className="text-muted-foreground whitespace-pre-line leading-relaxed">{description}</p>
       </div>
       <div className="space-y-2">
         <h3 className="font-semibold">Area</h3>

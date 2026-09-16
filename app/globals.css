@@ -127,3 +127,13 @@
     /* Removed @apply bg-background text-foreground; */
   }
 }
+
+.maplibregl-popup-content {
+  border-radius: 10px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 24px rgba(26, 36, 65, 0.16);
+}
+
+.maplibregl-ctrl-attrib {
+  font-size: 10px;
+}
