@@ -5,8 +5,8 @@ import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { CATEGORY_META, isValidCoordinates, type NearbyPlace } from '@/lib/nearbyPlaces';
 
-// Raster-first: no Mapbox token, no vector-style validation failures.
-// Carto light tiles match Sunday's clean navy/gold UI.
+// OSM raster tiles — no API key. Carto's public light tiles now watermark
+// "API KEY REQUIRED", so we stay on OSM.org / OSM.de.
 const OSM_RASTER_STYLE: maplibregl.StyleSpecification = {
   version: 8,
   name: 'OSM raster',
@@ -14,12 +14,12 @@ const OSM_RASTER_STYLE: maplibregl.StyleSpecification = {
     osm: {
       type: 'raster',
       tiles: [
-        'https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-        'https://b.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
-        'https://c.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png',
+        'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
+        'https://b.tile.openstreetmap.de/{z}/{x}/{y}.png',
+        'https://c.tile.openstreetmap.de/{z}/{x}/{y}.png',
       ],
       tileSize: 256,
-      attribution: '© OpenStreetMap © CARTO',
+      attribution: '© OpenStreetMap contributors',
     },
   },
   layers: [{ id: 'osm', type: 'raster', source: 'osm' }],
