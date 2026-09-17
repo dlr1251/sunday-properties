@@ -1,6 +1,7 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+@import 'maplibre-gl/dist/maplibre-gl.css';
 
 @layer base {
   :root {
@@ -126,6 +127,13 @@
   body {
     /* Removed @apply bg-background text-foreground; */
   }
+}
+
+.neighborhood-map .maplibregl-map,
+.neighborhood-map .maplibregl-canvas-container,
+.neighborhood-map .maplibregl-canvas {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .maplibregl-popup-content {

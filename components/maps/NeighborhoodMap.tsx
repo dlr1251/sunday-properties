@@ -5,8 +5,8 @@ import maplibregl, { type Map as MapLibreMap, type Marker } from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { CATEGORY_META, isValidCoordinates, type NearbyPlace } from '@/lib/nearbyPlaces';
 
-const OPENFREEMAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
-
+// Raster-first: no Mapbox token, no vector-style validation failures.
+// Carto light tiles match Sunday's clean navy/gold UI.
 const OSM_RASTER_STYLE: maplibregl.StyleSpecification = {
   version: 8,
   name: 'OSM raster',
@@ -91,26 +91,31 @@ export function NeighborhoodMap({
 
     const map = new maplibregl.Map({
       container: containerRef.current,
-      style: OPENFREEMAP_STYLE,
+      style: OSM_RASTER_STYLE,
       center: [coordinates!.lng, coordinates!.lat],
       zoom: 14.2,
-      attributionControl: { compact: true },
+      attributionControl: false,
     });
 
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), 'bottom-right');
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     mapRef.current = map;
 
-    map.on('error', (event) => {
-      const message = String(event.error?.message || '');
-      if (message.includes('openfreemap') || message.includes('Failed to fetch')) {
-        map.setStyle(OSM_RASTER_STYLE);
+    const resize = () => {
+      try {
+        map.resize();
+      } catch {
+        // Map may already be removed during unmount.
       }
-    });
-
-    const resize = () => map.resize();
+    };
+    const frame = window.requestAnimationFrame(resize);
+    const later = window.setTimeout(resize, 250);
+    map.on('load', resize);
     window.addEventListener('resize', resize);
 
     return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(later);
       window.removeEventListener('resize', resize);
       markersRef.current.forEach((marker) => marker.remove());
       markersRef.current = [];
@@ -198,8 +203,11 @@ export function NeighborhoodMap({
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ${heightClassName}`}>
+    <div className={`neighborhood-map relative overflow-hidden rounded-xl border border-slate-200 bg-slate-50 ${heightClassName}`}>
       <div ref={containerRef} className="absolute inset-0" data-testid="neighborhood-map" />
+      <div className="pointer-events-none absolute left-3 top-3 z-10 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-[#1a2441] shadow-sm">
+        {propertyTitle}
+      </div>
     </div>
   );
 }
