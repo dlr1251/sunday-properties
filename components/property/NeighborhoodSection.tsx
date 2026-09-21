@@ -157,9 +157,12 @@ export function NeighborhoodSection({
                   <div className="flex items-center gap-2 mb-2">
                     <span
                       className="inline-flex h-7 w-7 items-center justify-center rounded-full"
-                      style={{ backgroundColor: `${CATEGORY_META[group.category].color}1A` }}
+                      style={{
+                        backgroundColor: `${CATEGORY_META[group.category].color}1A`,
+                        color: CATEGORY_META[group.category].color,
+                      }}
                     >
-                      <Icon className="h-4 w-4" style={{ color: CATEGORY_META[group.category].color }} />
+                      <Icon className="h-4 w-4" />
                     </span>
                     <p className="text-sm font-semibold text-[#1a2441]">{CATEGORY_META[group.category].label}</p>
                   </div>
