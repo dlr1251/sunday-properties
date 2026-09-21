@@ -12,19 +12,40 @@ import Link from 'next/link';
 type Property = {
   id: string;
   title: string;
-  type: string;
-  price: number;
-  currency: string;
-  address: string;
-  city: string;
-  state: string;
-  postal_code: string;
-  bedrooms: number;
-  bathrooms: number;
-  area: number;
-  description: string;
-  user_id: string;
+  type?: string | null;
+  property_type?: string | null;
+  price?: number | null;
+  rent_monthly?: number | null;
+  listing_type?: string | null;
+  currency?: string | null;
+  address?: string | null;
+  city?: string | null;
+  state?: string | null;
+  postal_code?: string | null;
+  bedrooms?: number | null;
+  bathrooms?: number | null;
+  area?: number | null;
+  area_m2?: number | null;
+  description?: string | null;
+  user_id?: string | null;
+  owner_id?: string | null;
 };
+
+function formatListingPrice(property: Property): string {
+  const currency = property.currency || 'COP';
+  const monthly = property.rent_monthly;
+  const salePrice = property.price;
+  if (property.listing_type === 'rental' && monthly != null) {
+    return `${currency} ${Number(monthly).toLocaleString()}/mes`;
+  }
+  if (salePrice != null) {
+    return `${currency} ${Number(salePrice).toLocaleString()}`;
+  }
+  if (monthly != null) {
+    return `${currency} ${Number(monthly).toLocaleString()}/mes`;
+  }
+  return 'Precio a consultar';
+}
 
 export default function Search() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -194,7 +215,7 @@ export default function Search() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {properties.length === 0 && <p>No properties found matching your criteria.</p>}
         {properties.map((property) => {
-          const isOwned = userId === property.user_id;
+          const isOwned = !!userId && (userId === property.user_id || userId === property.owner_id);
           const isFavorited = favoritedPropertyIds.has(property.id);
           return (
             <Card key={property.id}>
@@ -208,8 +229,8 @@ export default function Search() {
                 <div className="space-y-2">
                   <div className="flex justify-between items-start">
                     <div>
-                      <p className="text-sm text-muted-foreground">{property.type}</p>
-                      <p className="font-medium">{property.address}, {property.city}</p>
+                      <p className="text-sm text-muted-foreground">{property.property_type || property.type || property.listing_type}</p>
+                      <p className="font-medium">{[property.address, property.city].filter(Boolean).join(', ')}</p>
                     </div>
                     <Button 
                       variant="ghost" 
@@ -221,11 +242,11 @@ export default function Search() {
                       <Heart className={`h-5 w-5 ${isFavorited ? 'text-red-500 fill-red-500' : 'text-gray-500'}`} />
                     </Button>
                   </div>
-                  <p className="text-lg font-bold">{property.currency} {property.price.toLocaleString()}</p>
+                  <p className="text-lg font-bold">{formatListingPrice(property)}</p>
                   <div className="flex gap-4 text-sm text-muted-foreground">
-                    <p>{property.bedrooms} dormitorios</p>
-                    <p>{property.bathrooms} baños</p>
-                    <p>{property.area}m²</p>
+                    <p>{property.bedrooms ?? 0} dormitorios</p>
+                    <p>{property.bathrooms ?? 0} baños</p>
+                    <p>{property.area_m2 ?? property.area ?? 0}m²</p>
                   </div>
                   <p className="line-clamp-2 text-sm">{property.description}</p>
                   <Link href={`/property/${encodeURIComponent(property.id)}`} className="w-full">
